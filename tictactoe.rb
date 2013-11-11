@@ -8,6 +8,7 @@ class TicTacToe
         @currentturn = 'X'
         @winner = ''
         @movenum = 0
+        @lastmoveindex = -1
         @exit = false
         @keyboard = false
         @numpad = false
@@ -205,16 +206,11 @@ class TicTacToe
     
     def MakeMove(move)
         move = Integer(move)
+        @lastmoveindex = move-1
         #Array index is one less than move space
-        if @board[move-1] == '_'
-            @board[move-1] = @currentturn
-            
-            #Toggle current player
-            if @currentturn == 'X'
-                @currentturn = 'O'
-            else
-                @currentturn = 'X'
-            end
+        if @board[@lastmoveindex] == '_'
+            @board[@lastmoveindex] = @currentturn
+
             #Increment move counter
             @movenum += 1
             
@@ -223,6 +219,15 @@ class TicTacToe
             
             #Check for win condition
             @winner = CheckWinner()
+            
+            if @winner == ''
+                #Toggle current player
+                if @currentturn == 'X'
+                    @currentturn = 'O'
+                else
+                    @currentturn = 'X'
+                end
+            end
         else
             #Do not allow player to choose space that has already been played
             puts "Space taken"
@@ -234,25 +239,114 @@ class TicTacToe
             #Game cannot end in less than 5 moves
             return ''
         else
-            #Check left column and top row
-            if ((@board[0] == @board[1] and @board[0] == @board[2]) or (@board[0] == @board[3] and @board[0] == @board[6])) and @board[0] != '_'
-                return @board[0]
-            #Check middle diagponals
-            elsif ((@board[4] == @board[0] and @board[4] == @board[8]) or (@board[4] == @board[2] and @board[4] == @board[6])) and @board[4] != '_'
-                return @board[4]
-            #Check middle column and middle row
-            elsif ((@board[4] == @board[1] and @board[4] == @board[7]) or (@board[4] == @board[3] and @board[4] == @board[5])) and @board[4] != '_'
-                return @board[4]
-            #Check right column and bottom row
-            elsif ((@board[8] == @board[7] and @board[8] == @board[6]) or (@board[8] == @board[5] and @board[8] == @board[2])) and @board[8] != '_'
-                return @board[8]
-            #If all moves have been made and no winner, cat game
-            elsif @movenum == 9
-                return 'C'
-            else
-                #Game has not yet been decided
-                return ''
+            
+            case @lastmoveindex / 3
+            #Determine row to check
+            when 0
+                if CheckWinTopRow() then return @currentturn end
+            when 1
+                if CheckWinCenterRow()
+                    return @currentturn 
+                end
+            when 2
+                if CheckWinBottomRow() 
+                    return @currentturn 
+                end
             end
+            
+            case @lastmoveindex % 3
+            #Determine column to check
+            when 0
+                if CheckWinLeftColumn() then return @currentturn end
+            when 1
+                if CheckWinMiddleColumn() then return @currentturn end
+            when 2
+                if CheckWinRightColumn() then return @currentturn end
+            end
+            
+            if @lastmoveindex % 2 == 0
+                #Determine diagonals to check
+                if @lastmoveindex == 4 or @lastmoveindex % 4 == 2
+                    if CheckWinBottomLeftToTopRight() 
+                        return @currentturn 
+                    end
+                elsif @lastmoveindex %4 == 0
+                    if CheckWinTopLeftToBottomRight() then return @currentturn end
+                end
+            end
+        end
+
+        if @movenum == 9
+            #Game over, no winner; cat's game
+            return 'C'
+        else
+            #Game has not yet been decided
+            return ''
+        end
+
+    end
+    
+    def CheckWinLeftColumn()
+        if (@board[0] == @board[3]) and (@board[0] == @board[6])
+            return true
+        else
+            return false
+        end
+    end
+    
+    def CheckWinMiddleColumn()
+        if (@board[4] == @board[1]) and (@board[4] == @board[7]) 
+            return true
+        else
+            return false
+        end 
+    end
+    
+    def CheckWinRightColumn()
+        if (@board[8] == @board[2]) and (@board[8] == @board[5])
+            return true
+        else
+            return false
+        end
+    end
+    
+    def CheckWinTopRow()
+        if (@board[0] == @board[1]) and (@board[0] == @board[2])
+            return true
+        else
+            return false
+        end
+    end
+    
+    def CheckWinCenterRow()
+        if (@board[4] == @board[3]) and (@board[4] == @board[5]) 
+            return true
+        else
+            return false
+        end
+    end
+    
+    def CheckWinBottomRow()
+        if (@board[8] == @board[7]) and (@board[8] == @board[6])
+            return true
+        else
+            return false
+        end
+    end
+    
+    def CheckWinTopLeftToBottomRight()
+        if (@board[4] == @board[0]) and (@board[4] == @board[8])
+            return true
+        else
+            return false
+        end
+    end
+    
+    def CheckWinBottomLeftToTopRight()
+        if (@board[4] == @board[2]) and (@board[4] == @board[6])
+            return true
+        else
+            return false
         end
     end
 end
