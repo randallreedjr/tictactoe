@@ -2,7 +2,8 @@ class TicTacToe
     
     def initialize
         #Set starting values for class variables
-        @board = ['_','_','_','_','_','_','_','_','_']
+        #@board = ['_','_','_','_','_','_','_','_','_']
+        @board = Array.new(9,'_')
         #Keep track of current player
         @currentturn = 'X'
         @winner = ''
