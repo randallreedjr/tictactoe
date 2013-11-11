@@ -19,11 +19,11 @@ class TicTacToe
         end
         move = Integer(move)
         #Array index is one less than move space
-        if @board[move-1] == '_' then
+        if @board[move-1] == '_'
             @board[move-1] = @currentturn
             
             #Toggle current player
-            if @currentturn == 'X' then
+            if @currentturn == 'X'
                 @currentturn = 'O'
             else
                 @currentturn = 'X'
@@ -83,7 +83,7 @@ class TicTacToe
         #Display board in same format as instuctions, with values filled in
         for i in 0..8
             print "|" + @board[i]
-            if i % 3 == 2 then 
+            if i % 3 == 2
                 #Start new line every 3 columns
                 print "|\n"
             end
