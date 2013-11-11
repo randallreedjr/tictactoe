@@ -8,6 +8,7 @@ class TicTacToe
         @currentturn = 'X'
         @winner = ''
         @movenum = 0
+        @exit = false
     end
     
     #Read access to class variables
@@ -19,6 +20,10 @@ class TicTacToe
         @movenum
     end
     
+    def ExitEarly
+        @exit
+    end
+    
     def PrintInstructions
         puts "Select space using number keys"
         puts "|1|2|3|"
@@ -27,6 +32,35 @@ class TicTacToe
         puts "X goes first"
     end
     
+    def ValidateCommand(command)
+        if command.length == 1 and (command >= '1' and command <= '9')
+            return true
+        end
+        case command.downcase
+    
+        when 'exit' 
+            return true
+        when 'board'
+            return true
+        else
+            return false
+        end
+    end
+    
+    def ExecuteCommand(command)
+        if command.length == 1 and (command >= '1' and command <= '9')
+            MakeMove(command)
+        end
+        case command.downcase
+        #Valid commands are move space, exit, and board
+        when 'exit' 
+            @exit = true
+        when 'board'
+            PrintBoard()
+        end
+    end
+    
+    #Display board's current state
     def PrintBoard
         #Display board in same format as instuctions, with values filled in
         for i in 0..8
@@ -38,7 +72,7 @@ class TicTacToe
         end
     end
     
-    #Print outcome to players
+    #Print outcome of game to players
     def PrintWinner
         if @winner == 'C'
             "Sorry, cat's game."
@@ -48,13 +82,6 @@ class TicTacToe
     end
     
     def MakeMove(move)
-        #Verify input
-        if not (move >= '1' and move <= '9')
-            puts "Select number 1-9\n"
-            #If invalid input is detected, redisplay instructions
-            PrintInstructions()
-            return
-        end
         move = Integer(move)
         #Array index is one less than move space
         if @board[move-1] == '_'
@@ -93,7 +120,7 @@ class TicTacToe
             elsif ((@board[4] == @board[0] and @board[4] == @board[8]) or (@board[4] == @board[2] and @board[4] == @board[6])) and @board[4] != '_'
                 return @board[4]
             #Check middle column and middle row
-            elsif ((@board[4] == @board[1] and @board == @board[7]) or (@board[4] == @board[3] and @board[4] == @board[5])) and @board[4] != '_'
+            elsif ((@board[4] == @board[1] and @board[4] == @board[7]) or (@board[4] == @board[3] and @board[4] == @board[5])) and @board[4] != '_'
                 return @board[4]
             #Check right column and bottom row
             elsif ((@board[8] == @board[7] and @board[8] == @board[6]) or (@board[8] == @board[5] and @board[8] == @board[2])) and @board[8] != '_'
@@ -107,7 +134,6 @@ class TicTacToe
             end
         end
     end
-    
 end
 
 
@@ -115,19 +141,19 @@ end
 t = TicTacToe.new
 t.PrintInstructions
 
-until t.Winner != '' or t.Move == 9
+until t.Winner != '' or t.Move == 9 or t.ExitEarly
     command = gets.chomp
-    if command == 'exit'
-        break
-    elsif command == "board"
-        t.PrintBoard
+    if t.ValidateCommand(command)
+        t.ExecuteCommand(command)
     else
-        t.MakeMove(command)
+        puts "Select number 1-9\n"
+        #If invalid input is detected, redisplay instructions
+        t.PrintInstructions()
     end
 end
 
 #Allow player to exit game early
-if command != 'exit'
+if not t.ExitEarly
     t.PrintWinner
 else
     "Game was exited early"
