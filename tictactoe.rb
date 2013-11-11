@@ -35,7 +35,7 @@ class TicTacToe
             PrintBoard()
             
             #Check for win condition
-            CheckWinner()
+            @winner = CheckWinner()
         else
             #Do not allow player to choose space that has already been played
             puts "Space taken"
@@ -50,16 +50,16 @@ class TicTacToe
         else
             #Check left column and top row
             if ((@board[0] == @board[1] and @board[0] == @board[2]) or (@board[0] == @board[3] and @board[0] == @board[6])) and @board[0] != '_'
-                @winner = @board[0]
+                return @board[0]
             #Check middle diagponals
             elsif ((@board[4] == @board[0] and @board[4] == @board[8]) or (@board[4] == @board[2] and @board[4] == @board[6])) and @board[4] != '_'
-                @winner = @board[4]
+                return @board[4]
             #Check middle column and middle row
             elsif ((@board[4] == @board[1] and @board == @board[7]) or (@board[4] == @board[3] and @board[4] == @board[5])) and @board[4] != '_'
-                @winner = @board[4]
+                return @board[4]
             #Check right column and bottom row
             elsif ((@board[8] == @board[7] and @board[8] == @board[6]) or (@board[8] == @board[5] and @board[8] == @board[2])) and @board[8] != '_'
-                @winner = @board[8]
+                return @board[8]
             #If all moves have been made and no winner, cat game
             elsif @movenum == 9
                 return 'C'
@@ -102,7 +102,7 @@ class TicTacToe
     #Print outcome to players
     def PrintWinner
         if @winner == 'C'
-            "Sorry, Cat wins."
+            "Sorry, cat's game."
         else
             "Congratulations! " + @winner + " wins!"
         end
