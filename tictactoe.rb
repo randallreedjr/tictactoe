@@ -64,7 +64,7 @@ class TicTacToe
         end
         case command.downcase
     
-        when 'exit', 'board','kb','num','np'
+        when 'exit', 'board','kb','num','np','debug'
             return true
         else
             return false
@@ -136,6 +136,8 @@ class TicTacToe
                 @numpad = true
                 puts "Now using number pad input"
                 PrintInstructions()
+            when 'debug'
+                ShowDebug()
             end
         end
 
@@ -160,6 +162,16 @@ class TicTacToe
         else
             "Congratulations! " + @winner + " wins!"
         end
+    end
+    
+    def ShowDebug
+        puts "Debug mode - Dump internal values"
+        puts "@currentturn: " + @currentturn
+        puts "@winner: " + @winner
+        puts "@movenum: " + @movenum.to_s
+        puts "@exit: " + @exit.to_s
+        puts "@keyboard: " + @keyboard.to_s
+        puts "@numpad: " + @numpad.to_s
     end
     
     def MakeMove(move)
