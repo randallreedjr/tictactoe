@@ -12,6 +12,9 @@ class TicTacToe
         #Set starting values for class variables
         #@board = ['_','_','_','_','_','_','_','_','_']
         @board = Array.new(9,'_')
+        @keyboardboard = ['Q','W','E','A','S','D','Z','X','C']
+        @numpadboard = ['7','8','9','4','5','6','1','2','3']
+        @defaultboard = ['1','2','3','4','5','6','7','8','9']
         @players = 2
         #Keep track of current player
         @currentturn = 'X'
@@ -38,19 +41,13 @@ class TicTacToe
         
         if @keyboard
             puts "Select space using letters"
-            puts "|Q|W|E|"
-            puts "|A|S|D|"
-            puts "|Z|X|C|"
+            PrintBoard(@keyboardboard)
         elsif @numpad
             puts "Select space using number pad"
-            puts "|7|8|9|"
-            puts "|4|5|6|"
-            puts "|1|2|3|" 
+            PrintBoard(@numpadboard)
         else
             puts "Select space using number keys"
-            puts "|1|2|3|"
-            puts "|4|5|6|"
-            puts "|7|8|9|"
+            PrintBoard(@defaultboard)
         end
         puts "X goes first"
     end
@@ -157,7 +154,7 @@ class TicTacToe
                 @exit = true
                 @playagain = false
             when 'board'
-                PrintBoard()
+                PrintBoard(@board)
             when 'kb'
                 @keyboard = true
                 @numpad = false
@@ -187,10 +184,10 @@ class TicTacToe
     end
     
     #Display board's current state
-    def PrintBoard
+    def PrintBoard(board)
         #Display board in same format as instuctions, with values filled in
         for i in 0..8
-            print "|" + @board[i]
+            print "|" + board[i]
             if i % 3 == 2
                 #Start new line every 3 columns
                 print "|\n"
@@ -263,7 +260,7 @@ class TicTacToe
             @movenum += 1
             
             #Show updated board
-            PrintBoard()
+            PrintBoard(@board)
             
             #Check for win condition
             @winner = CheckWinner()
@@ -290,7 +287,14 @@ class TicTacToe
                 move = rand(9)
             end
             #Need to increment index to match normal layout
-            puts "Computer chooses " + (move+1).to_s
+            if @keyboard
+                movestring = @keyboardboard[move]
+            elsif @numpad
+                movestring = @numpadboard[move]
+            else
+                movestring = (move+1).to_s
+            end
+            puts "Computer chooses " + movestring
             MakeMove(move+1)
         end
     end
