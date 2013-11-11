@@ -9,6 +9,7 @@ class TicTacToe
         @winner = ''
         @movenum = 0
         @exit = false
+        @keyboard = false
     end
     
     #Read access to class variables
@@ -25,22 +26,39 @@ class TicTacToe
     end
     
     def PrintInstructions
-        puts "Select space using number keys"
-        puts "|1|2|3|"
-        puts "|4|5|6|"
-        puts "|7|8|9|"
+        
+        if not @keyboard
+            puts "Select space using number keys"
+            puts "|1|2|3|"
+            puts "|4|5|6|"
+            puts "|7|8|9|"
+        else
+            puts "Select space using letters"
+            puts "|Q|W|E|"
+            puts "|A|S|D|"
+            puts "|Z|X|C|"
+        end
         puts "X goes first"
     end
     
     def ValidateCommand(command)
-        if command.length == 1 and (command >= '1' and command <= '9')
-            return true
+        if command.length == 1 
+            if not @keyboard and (command >= '1' and command <= '9')
+                return true
+            elsif @keyboard
+                case command.downcase
+                when 'q','w','e','a','s','d','z','x','c'
+                    return true
+                else
+                    return false
+                end
+            else
+                return false
+            end
         end
         case command.downcase
     
-        when 'exit' 
-            return true
-        when 'board'
+        when 'exit', 'board','kb','num'
             return true
         else
             return false
@@ -48,16 +66,50 @@ class TicTacToe
     end
     
     def ExecuteCommand(command)
-        if command.length == 1 and (command >= '1' and command <= '9')
-            MakeMove(command)
+        if command.length == 1 
+            if not @keyboard and (command >= '1' and command <= '9')
+                MakeMove(command)
+            elsif @keyboard
+                case command.downcase
+                when 'q'
+                    command = 1
+                when 'w'
+                    command = 2
+                when 'e'
+                    command = 3
+                when 'a'
+                    command = 4
+                when 's'
+                    command = 5
+                when 'd'
+                    command = 6
+                when 'z'
+                    command = 7
+                when 'x'
+                    command = 8
+                when 'c'
+                    command = 9
+                end
+                MakeMove(command)
+            end
+        else
+            case command.downcase
+            #Valid commands are move space, exit, board, kb, and #
+            when 'exit' 
+                @exit = true
+            when 'board'
+                PrintBoard()
+            when 'kb'
+                @keyboard = true
+                puts "Now using keyboard input"
+                PrintInstructions()
+            when 'num'
+                @keyboard = false
+                puts "Now using number input"
+                PrintInstructions()
+            end
         end
-        case command.downcase
-        #Valid commands are move space, exit, and board
-        when 'exit' 
-            @exit = true
-        when 'board'
-            PrintBoard()
-        end
+
     end
     
     #Display board's current state
