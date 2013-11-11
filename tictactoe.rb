@@ -80,6 +80,7 @@ class TicTacToe
             puts "Select difficutly"
             puts "1) Easy"
             puts "2) Normal"
+            puts "3) Hard"
             input = gets.chomp
             
             if input == '1' or input.downcase == 'easy'
@@ -88,6 +89,9 @@ class TicTacToe
             elsif input == '2' or input.downcase == 'normal'
                 @difficulty = 'normal'
                 puts "Now playing computer on normal"
+            elsif input == '3' or input.downcase == 'hard'
+                @difficulty = 'hard'
+                puts "Now playing computer on HARD"
             elsif ValidateCommand(input)
                 puts "Select difficulty before setting options"
                 SelectDifficulty()
@@ -327,19 +331,38 @@ class TicTacToe
         if @winner == ''
             if @difficulty == 'easy'
                 move = RandomMove()
-            elsif @difficulty == 'normal'
+            elsif @difficulty == 'hard' and @movenum < 4
+                if @movenum == 1
+                    if @board[4] == '_'
+                        move = 4
+                    else
+                        move = 0
+                    end
+                else
+                    if @board[1] == '_'
+                        move = 1
+                    elsif @board[3] == '_'
+                        move = 3
+                    elsif @board[5] == '_'
+                        move = 5
+                    elsif @board[7] == '_'
+                        move = 7
+                    end
+                end
+                
+            elsif @difficulty == 'normal' or @difficulty == 'hard'
                 if @movenum < 3
                     move = RandomMove()
                 else
                     #Check for winning move first
-                    puts "Checking for win..."
+                    #puts "Checking for win..."
                     move = FindWinningMove()
                     if move == -1
                          #No winning move available, try block next
-                        puts "Checking for block..."
+                        #puts "Checking for block..."
                         move = FindBlockingMove()
                         if move == -1 then
-                            puts "Moving randomly..."
+                            #puts "Moving randomly..."
                             move = RandomMove()
                         end
                     end
