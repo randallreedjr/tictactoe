@@ -10,6 +10,7 @@ class TicTacToe
         @movenum = 0
         @exit = false
         @keyboard = false
+        @numpad = false
     end
     
     #Read access to class variables
@@ -27,16 +28,21 @@ class TicTacToe
     
     def PrintInstructions
         
-        if not @keyboard
-            puts "Select space using number keys"
-            puts "|1|2|3|"
-            puts "|4|5|6|"
-            puts "|7|8|9|"
-        else
+        if @keyboard
             puts "Select space using letters"
             puts "|Q|W|E|"
             puts "|A|S|D|"
             puts "|Z|X|C|"
+        elsif @numpad
+            puts "Select space using number pad"
+            puts "|7|8|9|"
+            puts "|4|5|6|"
+            puts "|1|2|3|" 
+        else
+            puts "Select space using number keys"
+            puts "|1|2|3|"
+            puts "|4|5|6|"
+            puts "|7|8|9|"
         end
         puts "X goes first"
     end
@@ -58,7 +64,7 @@ class TicTacToe
         end
         case command.downcase
     
-        when 'exit', 'board','kb','num'
+        when 'exit', 'board','kb','num','np'
             return true
         else
             return false
@@ -68,6 +74,22 @@ class TicTacToe
     def ExecuteCommand(command)
         if command.length == 1 
             if not @keyboard and (command >= '1' and command <= '9')
+                if @numpad
+                    case command
+                    when '1'
+                        command = '7'
+                    when '2'
+                        command = '8'
+                    when '3'
+                        command = '9'
+                    when '7'
+                        command = '1'
+                    when '8'
+                        command = '2'
+                    when '9'
+                        command = '3'
+                    end
+                end
                 MakeMove(command)
             elsif @keyboard
                 case command.downcase
@@ -101,11 +123,18 @@ class TicTacToe
                 PrintBoard()
             when 'kb'
                 @keyboard = true
+                @numpad = false
                 puts "Now using keyboard input"
                 PrintInstructions()
             when 'num'
                 @keyboard = false
+                @numpad = false
                 puts "Now using number input"
+                PrintInstructions()
+            when 'np'
+                @keyboard = false
+                @numpad = true
+                puts "Now using number pad input"
                 PrintInstructions()
             end
         end
