@@ -206,6 +206,9 @@ class TicTacToe
                 PrintInstructions()
             when 'players'
                 SelectPlayers()
+                if @players == 1
+                    SelectDifficulty()
+                end
                 PrintInstructions()
             when 'difficulty'
                 SelectDifficulty()
@@ -331,7 +334,7 @@ class TicTacToe
         if @winner == ''
             if @difficulty == 'easy'
                 move = RandomMove()
-            elsif @difficulty == 'hard' and @movenum < 4
+            elsif @difficulty == 'hard'
                 if @movenum == 1
                     if @board[4] == '_'
                         move = 4
@@ -339,18 +342,29 @@ class TicTacToe
                         move = 0
                     end
                 else
-                    if @board[1] == '_'
-                        move = 1
-                    elsif @board[3] == '_'
-                        move = 3
-                    elsif @board[5] == '_'
-                        move = 5
-                    elsif @board[7] == '_'
-                        move = 7
+                    #Check for winning move first
+                    #puts "Checking for win..."
+                    move = FindWinningMove()
+                    if move == -1
+                         #No winning move available, try block next
+                        #puts "Checking for block..."
+                        move = FindBlockingMove()
+                        if move == -1 then
+                            #puts "Select side"
+                            if @board[1] == '_'
+                                move = 1
+                            elsif @board[3] == '_'
+                                move = 3
+                            elsif @board[5] == '_'
+                                move = 5
+                            elsif @board[7] == '_'
+                                move = 7
+                            end
+                        end
                     end
                 end
                 
-            elsif @difficulty == 'normal' or @difficulty == 'hard'
+            elsif @difficulty == 'normal'
                 if @movenum < 3
                     move = RandomMove()
                 else
