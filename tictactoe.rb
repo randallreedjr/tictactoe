@@ -64,7 +64,7 @@ class TicTacToe
         end
         case command.downcase
     
-        when 'exit', 'board','kb','num','np','debug'
+        when 'exit', 'board','kb','num','np','help','debug'
             return true
         else
             return false
@@ -136,6 +136,8 @@ class TicTacToe
                 @numpad = true
                 puts "Now using number pad input"
                 PrintInstructions()
+            when 'help'
+                ShowHelp()
             when 'debug'
                 ShowDebug()
             end
@@ -174,6 +176,15 @@ class TicTacToe
         puts "@numpad: " + @numpad.to_s
     end
     
+    def ShowHelp
+        puts "Available commands are:"
+        puts "help - displays this screen"
+        puts "board - displays current game board"
+        puts "kb - changes to keyboard input (q,w,e,a,s,d,z,x,c)"
+        puts "num - changes to number inputs (default; 1-9)"
+        puts "np - inverts number input to match number pad"
+    end
+    
     def MakeMove(move)
         move = Integer(move)
         #Array index is one less than move space
@@ -198,7 +209,6 @@ class TicTacToe
             #Do not allow player to choose space that has already been played
             puts "Space taken"
         end
-
     end
     
     def CheckWinner
