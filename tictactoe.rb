@@ -6,12 +6,13 @@ class TicTacToe
     attr_reader :playagain
     attr_reader :exit
     attr_reader :keyboard
-    
+    attr_reader :players
     
     def initialize
         #Set starting values for class variables
         #@board = ['_','_','_','_','_','_','_','_','_']
         @board = Array.new(9,'_')
+        @players = 2
         #Keep track of current player
         @currentturn = 'X'
         @winner = ''
@@ -54,6 +55,24 @@ class TicTacToe
         puts "X goes first"
     end
     
+    def SelectPlayers
+        if @movenum == 0 then
+            puts "How many players? (Enter 1 or 2)"
+            input = gets.chomp
+            if input == '1'
+                @players = 1
+                puts "Now playing computer (easy)"
+            elsif input == '2'
+                @players = 2
+            else
+                puts "Invalid input; assuming 2 players"
+                @players = 2
+            end
+        else
+            puts "Cannot change players during game"
+        end
+    end
+    
     def ValidateCommand(command)
         if command.length == 1 
             if not @keyboard and (command >= '1' and command <= '9')
@@ -69,9 +88,10 @@ class TicTacToe
                 return false
             end
         end
+        
         case command.downcase
     
-        when 'exit', 'board','kb','num','np','help','debug'
+        when 'exit', 'board','kb','num','np','players','help','debug'
             return true
         else
             return false
@@ -82,6 +102,7 @@ class TicTacToe
         if command.length == 1 
             if not @keyboard and (command >= '1' and command <= '9')
                 if @numpad
+                    #Convert keypad entry to normal number entry
                     case command
                     when '1'
                         command = '7'
@@ -98,6 +119,10 @@ class TicTacToe
                     end
                 end
                 MakeMove(command)
+                if @players == 1
+                    #Computer will check for winner before making move
+                    ComputerMove()
+                end
             elsif @keyboard
                 case command.downcase
                 when 'q'
@@ -120,10 +145,14 @@ class TicTacToe
                     command = 9
                 end
                 MakeMove(command)
+                if @players == 1 
+                    #Computer will check for winner before making move
+                    ComputerMove()
+                end
             end
         else
             case command.downcase
-            #Valid commands are move space, exit, board, kb, and #
+            #Valid commands are move space, exit, board, kb, num, np, players, help, and debug
             when 'exit' 
                 @exit = true
                 @playagain = false
@@ -144,9 +173,14 @@ class TicTacToe
                 @numpad = true
                 puts "Now using number pad input"
                 PrintInstructions()
+            when 'players'
+                SelectPlayers()
+                PrintInstructions()
             when 'help'
+                #display list of commands
                 ShowHelp()
             when 'debug'
+                #for developer only; not included in help list
                 ShowDebug()
             end
         end
@@ -169,7 +203,15 @@ class TicTacToe
         if @winner == 'C'
             puts "Sorry, cat's game."
         else
-            puts "Congratulations! " + @winner + " wins!"
+            if @players == 2 
+                puts "Congratulations! " + @winner + " wins!"
+            elsif @players == 1 and @winner == 'X'
+                puts "Congratulations! Player wins!"
+            else
+                #1 player, 'O' won
+                puts "Sorry, computer wins."
+            end
+            
         end
     end
     
@@ -182,12 +224,15 @@ class TicTacToe
         elsif option == 'n' or option == 'exit'
             @playagain = false
         else
+            #for invalid input, recall recursively
             AskPlayAgain()
         end
     end
     
     def ShowDebug
+        #Print internal values so developer can inspect
         puts "Debug mode - Dump internal values"
+        puts "@players: " + @players.to_s
         puts "@currentturn: " + @currentturn
         puts "@winner: " + @winner
         puts "@movenum: " + @movenum.to_s
@@ -197,6 +242,7 @@ class TicTacToe
     end
     
     def ShowHelp
+        #Show user what options are available
         puts "Available commands are:"
         puts "help - displays this screen"
         puts "board - displays current game board"
@@ -236,6 +282,19 @@ class TicTacToe
         end
     end
     
+    def ComputerMove()
+        if @winner == ''
+            #Select random number 0-8 inclusive; this will match board index
+            move = rand(9)
+            while @board[move] != '_'
+                move = rand(9)
+            end
+            #Need to increment index to match normal layout
+            puts "Computer chooses " + (move+1).to_s
+            MakeMove(move+1)
+        end
+    end
+    
     def CheckWinner
         if @movenum < 5 
             #Game cannot end in less than 5 moves
@@ -247,13 +306,9 @@ class TicTacToe
             when 0
                 if CheckWinTopRow() then return @currentturn end
             when 1
-                if CheckWinCenterRow()
-                    return @currentturn 
-                end
+                if CheckWinCenterRow() then return @currentturn end
             when 2
-                if CheckWinBottomRow() 
-                    return @currentturn 
-                end
+                if CheckWinBottomRow() then return @currentturn end
             end
             
             case @lastmoveindex % 3
@@ -269,9 +324,7 @@ class TicTacToe
             if @lastmoveindex % 2 == 0
                 #Determine diagonals to check
                 if @lastmoveindex == 4 or @lastmoveindex % 4 == 2
-                    if CheckWinBottomLeftToTopRight() 
-                        return @currentturn 
-                    end
+                    if CheckWinBottomLeftToTopRight() then return @currentturn end
                 elsif @lastmoveindex %4 == 0
                     if CheckWinTopLeftToBottomRight() then return @currentturn end
                 end
@@ -356,6 +409,7 @@ end
 
 #Run program
 t = TicTacToe.new
+t.SelectPlayers()
 t.PrintInstructions()
 
 while t.playagain and not t.exit do
@@ -379,6 +433,8 @@ while t.playagain and not t.exit do
         t.PrintWinner()
         t.AskPlayAgain()
     else
-        "Game was exited early"
+        puts "Game was exited early"
     end
 end
+
+puts "Thanks for playing!"
