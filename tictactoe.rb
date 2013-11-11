@@ -1,5 +1,12 @@
 class TicTacToe
     
+    #Read access to some class variables
+    attr_reader :winner
+    attr_reader :movenum
+    attr_reader :playagain
+    attr_reader :exit
+    
+    
     def initialize
         #Set starting values for class variables
         #@board = ['_','_','_','_','_','_','_','_','_']
@@ -15,21 +22,14 @@ class TicTacToe
         @playagain = true
     end
     
-    #Read access to class variables
-    def Winner
-        @winner
-    end
-    
-    def Move
-        @movenum
-    end
-    
-    def PlayAgain
-        @playagain
-    end
-    
-    def ExitEarly
-        @exit
+    def Reset
+        #Reset game specific variables
+        @board = Array.new(9,'_')
+        @currentturn = 'X'
+        @winner = ''
+        @movenum = 0
+        @lastmoveindex = -1
+        @playagain = true
     end
     
     def PrintInstructions
@@ -176,7 +176,7 @@ class TicTacToe
         puts "Would you like to play again? y/n"
         option = gets.chomp.downcase
         if option == 'y'
-            initialize()
+            Reset()
             PrintInstructions()
         elsif option == 'n' or option == 'exit'
             @playagain = false
@@ -356,8 +356,8 @@ end
 t = TicTacToe.new
 t.PrintInstructions()
 
-while t.PlayAgain and not t.ExitEarly do
-    until t.Winner != '' or t.Move == 9 or t.ExitEarly
+while t.playagain and not t.exit do
+    until t.winner != '' or t.movenum == 9 or t.exit
         command = gets.chomp
         if t.ValidateCommand(command)
             t.ExecuteCommand(command)
@@ -369,7 +369,7 @@ while t.PlayAgain and not t.ExitEarly do
     end
     
     #Allow player to exit game early
-    if not t.ExitEarly
+    if not t.exit
         t.PrintWinner()
         t.AskPlayAgain()
     else
