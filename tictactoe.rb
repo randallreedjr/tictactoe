@@ -21,6 +21,7 @@ class TicTacToe
         @winner = ''
         @movenum = 0
         @lastmoveindex = -1
+        @penultimatemoveindex = -1
         @exit = false
         @keyboard = false
         @numpad = false
@@ -61,6 +62,9 @@ class TicTacToe
                 puts "Now playing computer (easy)"
             elsif input == '2'
                 @players = 2
+            elsif ValidateCommand(input)
+                puts "Select players before setting options"
+                SelectPlayers()
             else
                 puts "Invalid input; assuming 2 players"
                 @players = 2
@@ -88,7 +92,7 @@ class TicTacToe
         
         case command.downcase
     
-        when 'exit', 'board','kb','num','np','players','help','debug'
+        when 'exit', 'board','kb','num','np','players','help','undo','debug'
             return true
         else
             return false
@@ -176,6 +180,12 @@ class TicTacToe
             when 'help'
                 #display list of commands
                 ShowHelp()
+            when 'undo'
+                #Cannot undo winning move
+                if winner == ''
+                    UndoMove()
+                end
+                PrintBoard(@board)
             when 'debug'
                 #for developer only; not included in help list
                 ShowDebug()
@@ -243,14 +253,17 @@ class TicTacToe
         puts "Available commands are:"
         puts "help - displays this screen"
         puts "board - displays current game board"
+        puts "players - change number of players"
         puts "kb - changes to keyboard input (q,w,e,a,s,d,z,x,c)"
         puts "num - changes to number inputs (default; 1-9)"
         puts "np - inverts number input to match number pad"
+        puts "undo - undo last move (only one move can be undone)"
         puts "exit - quits game"
     end
     
     def MakeMove(move)
         move = Integer(move)
+        @penultimatemoveindex = @lastmoveindex
         @lastmoveindex = move-1
         #Array index is one less than move space
         if @board[@lastmoveindex] == '_'
@@ -297,6 +310,34 @@ class TicTacToe
             puts "Computer chooses " + movestring
             MakeMove(move+1)
         end
+    end
+    
+    def UndoMove()
+        if @players == 1
+            #Undo computer and player move
+            #Clear 2 moves from board
+            @board[@lastmoveindex] = '_'
+            @board[@penultimatemoveindex] = '_'
+            @lastmoveindex = -1
+            @penultimatemoveindex = -1
+            
+            @movenum -= 2
+        else
+            #Undo player move only
+            #Clear move
+            @board[@lastmoveindex] = '_'
+            
+            #Decrement move counter
+            @movenum -= 1
+            
+            #Toggle current player
+            if @currentturn == 'X'
+                @currentturn = 'O'
+            else
+                @currentturn = 'X'
+            end
+        end
+        puts "Move undone"
     end
     
     def CheckWinner
