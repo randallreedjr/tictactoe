@@ -203,6 +203,7 @@ class TicTacToe
         puts "kb - changes to keyboard input (q,w,e,a,s,d,z,x,c)"
         puts "num - changes to number inputs (default; 1-9)"
         puts "np - inverts number input to match number pad"
+        puts "exit - quits game"
     end
     
     def MakeMove(move)
