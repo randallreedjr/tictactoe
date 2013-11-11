@@ -11,6 +11,7 @@ class TicTacToe
         @exit = false
         @keyboard = false
         @numpad = false
+        @playagain = true
     end
     
     #Read access to class variables
@@ -20,6 +21,10 @@ class TicTacToe
     
     def Move
         @movenum
+    end
+    
+    def PlayAgain
+        @playagain
     end
     
     def ExitEarly
@@ -119,6 +124,7 @@ class TicTacToe
             #Valid commands are move space, exit, board, kb, and #
             when 'exit' 
                 @exit = true
+                @playagain = false
             when 'board'
                 PrintBoard()
             when 'kb'
@@ -142,7 +148,6 @@ class TicTacToe
                 ShowDebug()
             end
         end
-
     end
     
     #Display board's current state
@@ -160,9 +165,22 @@ class TicTacToe
     #Print outcome of game to players
     def PrintWinner
         if @winner == 'C'
-            "Sorry, cat's game."
+            puts "Sorry, cat's game."
         else
-            "Congratulations! " + @winner + " wins!"
+            puts "Congratulations! " + @winner + " wins!"
+        end
+    end
+    
+    def AskPlayAgain
+        puts "Would you like to play again? y/n"
+        option = gets.chomp.downcase
+        if option == 'y'
+            initialize()
+            PrintInstructions()
+        elsif option == 'n' or option == 'exit'
+            @playagain = false
+        else
+            AskPlayAgain()
         end
     end
     
@@ -242,22 +260,25 @@ end
 
 #Run program
 t = TicTacToe.new
-t.PrintInstructions
+t.PrintInstructions()
 
-until t.Winner != '' or t.Move == 9 or t.ExitEarly
-    command = gets.chomp
-    if t.ValidateCommand(command)
-        t.ExecuteCommand(command)
-    else
-        puts "Select number 1-9\n"
-        #If invalid input is detected, redisplay instructions
-        t.PrintInstructions()
+while t.PlayAgain and not t.ExitEarly do
+    until t.Winner != '' or t.Move == 9 or t.ExitEarly
+        command = gets.chomp
+        if t.ValidateCommand(command)
+            t.ExecuteCommand(command)
+        else
+            puts "Select number 1-9\n"
+            #If invalid input is detected, redisplay instructions
+            t.PrintInstructions()
+        end
     end
-end
-
-#Allow player to exit game early
-if not t.ExitEarly
-    t.PrintWinner
-else
-    "Game was exited early"
+    
+    #Allow player to exit game early
+    if not t.ExitEarly
+        t.PrintWinner()
+        t.AskPlayAgain()
+    else
+        "Game was exited early"
+    end
 end
