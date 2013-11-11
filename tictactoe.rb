@@ -27,6 +27,7 @@ class TicTacToe
         @numpad = false
         @playagain = true
         @difficulty = 'easy'
+        @movesuccess = false
     end
     
     def Reset
@@ -145,7 +146,7 @@ class TicTacToe
                     end
                 end
                 MakeMove(command)
-                if @players == 1
+                if @players == 1 and @movesuccess
                     #Computer will check for winner before making move
                     ComputerMove()
                 end
@@ -171,7 +172,7 @@ class TicTacToe
                     command = 9
                 end
                 MakeMove(command)
-                if @players == 1 
+                if @players == 1 and @movesuccess
                     #Computer will check for winner before making move
                     ComputerMove()
                 end
@@ -314,9 +315,11 @@ class TicTacToe
                     @currentturn = 'X'
                 end
             end
+            @movesuccess = true
         else
             #Do not allow player to choose space that has already been played
             puts "Space taken"
+            @movesuccess = false
         end
     end
     
