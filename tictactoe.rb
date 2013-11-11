@@ -5,6 +5,7 @@ class TicTacToe
     attr_reader :movenum
     attr_reader :playagain
     attr_reader :exit
+    attr_reader :keyboard
     
     
     def initialize
@@ -362,7 +363,11 @@ while t.playagain and not t.exit do
         if t.ValidateCommand(command)
             t.ExecuteCommand(command)
         else
-            puts "Select number 1-9\n"
+            if t.keyboard
+                puts "Select valid letter\n"
+            else
+                puts "Select number 1-9\n"
+            end
             #If invalid input is detected, redisplay instructions
             t.PrintInstructions()
         end
