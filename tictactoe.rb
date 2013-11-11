@@ -11,7 +11,7 @@ class TicTacToe
     
     def makemove(move)
         #Verify input
-        if not (move == '1' or move == '2' or move == '3' or move == '4' or move == '5' or move == '6' or move == '7' or move == '8' or move == '9') 
+        if not (move >= '1' and move <= '9')
             puts "Select number 1-9\n"
             #If invalid input is detected, redisplay instructions
             PrintInstructions()
