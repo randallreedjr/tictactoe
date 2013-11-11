@@ -10,7 +10,44 @@ class TicTacToe
         @movenum = 0
     end
     
-    def makemove(move)
+    #Read access to class variables
+    def Winner
+        @winner
+    end
+    
+    def Move
+        @movenum
+    end
+    
+    def PrintInstructions
+        puts "Select space using number keys"
+        puts "|1|2|3|"
+        puts "|4|5|6|"
+        puts "|7|8|9|"
+        puts "X goes first"
+    end
+    
+    def PrintBoard
+        #Display board in same format as instuctions, with values filled in
+        for i in 0..8
+            print "|" + @board[i]
+            if i % 3 == 2
+                #Start new line every 3 columns
+                print "|\n"
+            end
+        end
+    end
+    
+    #Print outcome to players
+    def PrintWinner
+        if @winner == 'C'
+            "Sorry, cat's game."
+        else
+            "Congratulations! " + @winner + " wins!"
+        end
+    end
+    
+    def MakeMove(move)
         #Verify input
         if not (move >= '1' and move <= '9')
             puts "Select number 1-9\n"
@@ -71,43 +108,6 @@ class TicTacToe
         end
     end
     
-    
-    def PrintInstructions
-        puts "Select space using number keys"
-        puts "|1|2|3|"
-        puts "|4|5|6|"
-        puts "|7|8|9|"
-        puts "X goes first"
-    end
-    
-    def PrintBoard
-        #Display board in same format as instuctions, with values filled in
-        for i in 0..8
-            print "|" + @board[i]
-            if i % 3 == 2
-                #Start new line every 3 columns
-                print "|\n"
-            end
-        end
-    end
-    
-    #Read access to class variables
-    def Winner
-        @winner
-    end
-    
-    def Move
-        @movenum
-    end
-    
-    #Print outcome to players
-    def PrintWinner
-        if @winner == 'C'
-            "Sorry, cat's game."
-        else
-            "Congratulations! " + @winner + " wins!"
-        end
-    end
 end
 
 
@@ -122,7 +122,7 @@ until t.Winner != '' or t.Move == 9
     elsif command == "board"
         t.PrintBoard
     else
-        t.makemove(command)
+        t.MakeMove(command)
     end
 end
 
@@ -132,4 +132,3 @@ if command != 'exit'
 else
     "Game was exited early"
 end
-
