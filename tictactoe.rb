@@ -26,6 +26,7 @@ class TicTacToe
         @keyboard = false
         @numpad = false
         @playagain = true
+        @difficulty = 'easy'
     end
     
     def Reset
@@ -59,7 +60,6 @@ class TicTacToe
             input = gets.chomp
             if input == '1'
                 @players = 1
-                puts "Now playing computer (easy)"
             elsif input == '2'
                 @players = 2
             elsif ValidateCommand(input)
@@ -71,6 +71,31 @@ class TicTacToe
             end
         else
             puts "Cannot change players during game"
+        end
+    end
+    
+    def SelectDifficulty
+        if @movenum == 0 then
+            puts "Select difficutly"
+            puts "1) Easy"
+            puts "2) Normal"
+            input = gets.chomp
+            
+            if input == '1' or input.downcase == 'easy'
+                @difficulty = 'easy'
+                puts "Now playing computer on easy"
+            elsif input == '2' or input.downcase == 'normal'
+                @difficulty = 'normal'
+                puts "Now playing computer on normal"
+            elsif ValidateCommand(input)
+                puts "Select difficulty before setting options"
+                SelectDifficulty()
+            else
+                puts "Invalid input; defaulting to easy"
+                @difficulty = 'easy'
+            end
+        else
+            puts "Cannot change difficulty during game"
         end
     end
     
@@ -92,7 +117,7 @@ class TicTacToe
         
         case command.downcase
     
-        when 'exit', 'board','kb','num','np','players','help','undo','debug'
+        when 'exit', 'board','kb','num','np','players','difficulty','help','undo','debug'
             return true
         else
             return false
@@ -177,6 +202,8 @@ class TicTacToe
             when 'players'
                 SelectPlayers()
                 PrintInstructions()
+            when 'difficulty'
+                SelectDifficulty()
             when 'help'
                 #display list of commands
                 ShowHelp()
@@ -218,7 +245,6 @@ class TicTacToe
                 #1 player, 'O' won
                 puts "Sorry, computer wins."
             end
-            
         end
     end
     
@@ -240,6 +266,7 @@ class TicTacToe
         #Print internal values so developer can inspect
         puts "Debug mode - Dump internal values"
         puts "@players: " + @players.to_s
+        puts "@difficulty: " + @difficulty
         puts "@currentturn: " + @currentturn
         puts "@winner: " + @winner
         puts "@movenum: " + @movenum.to_s
@@ -254,6 +281,7 @@ class TicTacToe
         puts "help - displays this screen"
         puts "board - displays current game board"
         puts "players - change number of players"
+        puts "difficulty - change difficulty level"
         puts "kb - changes to keyboard input (q,w,e,a,s,d,z,x,c)"
         puts "num - changes to number inputs (default; 1-9)"
         puts "np - inverts number input to match number pad"
@@ -276,7 +304,7 @@ class TicTacToe
             PrintBoard(@board)
             
             #Check for win condition
-            @winner = CheckWinner()
+            @winner = CheckWinner(@lastmoveindex)
             
             if @winner == ''
                 #Toggle current player
@@ -294,22 +322,79 @@ class TicTacToe
     
     def ComputerMove()
         if @winner == ''
-            #Select random number 0-8 inclusive; this will match board index
-            move = rand(9)
-            while @board[move] != '_'
-                move = rand(9)
+            if @difficulty == 'easy'
+                move = RandomMove()
+            elsif @difficulty == 'normal'
+                if @movenum < 3
+                    move = RandomMove()
+                else
+                    #Check for winning move first
+                    puts "Checking for win..."
+                    move = FindWinningMove()
+                    if move == -1
+                         #No winning move available, try block next
+                        puts "Checking for block..."
+                        move = FindBlockingMove()
+                        if move == -1 then
+                            puts "Moving randomly..."
+                            move = RandomMove()
+                        end
+                    end
+                end
             end
-            #Need to increment index to match normal layout
-            if @keyboard
-                movestring = @keyboardboard[move]
-            elsif @numpad
-                movestring = @numpadboard[move]
-            else
-                movestring = (move+1).to_s
-            end
-            puts "Computer chooses " + movestring
-            MakeMove(move+1)
+            ShowComputerMove(move)
+            MakeMove(move+1) 
         end
+    end
+    
+    def FindWinningMove()
+        for i in 0..8
+            if @board[i] == '_'
+                @board[i] = 'O'
+                if CheckWinner(i) == 'O'
+                    @board[i] = '_'
+                    return i
+                end
+                @board[i] = '_'
+            end
+        end
+        return -1
+    end
+    
+    def FindBlockingMove()
+        for i in 0..8
+            if @board[i] == '_'
+                @board[i] = 'X'
+                #CheckWinner returns currentturn, so it will still be O
+                if CheckWinner(i) == 'O'
+                    @board[i] = '_'
+                    return i
+                end
+                @board[i] = '_'
+            end
+        end
+        return -1
+    end
+    
+    def RandomMove()
+        #Select random number 0-8 inclusive; this will match board index
+        move = rand(9)
+        while @board[move] != '_'
+            move = rand(9)
+        end
+        return move
+    end
+    
+    def ShowComputerMove(move)
+                #Need to increment index to match normal layout
+        if @keyboard
+            movestring = @keyboardboard[move]
+        elsif @numpad
+            movestring = @numpadboard[move]
+        else
+            movestring = (move+1).to_s
+        end
+        puts "Computer chooses " + movestring
     end
     
     def UndoMove()
@@ -340,13 +425,14 @@ class TicTacToe
         puts "Move undone"
     end
     
-    def CheckWinner
-        if @movenum < 5 
+    def CheckWinner(lastmoveindex)
+        if @movenum < 3
             #Game cannot end in less than 5 moves
+            #However, computer uses this to check for blocks on move 4
             return ''
         else
             
-            case @lastmoveindex / 3
+            case lastmoveindex / 3
             #Determine row to check
             when 0
                 if CheckWinTopRow() then return @currentturn end
@@ -356,7 +442,7 @@ class TicTacToe
                 if CheckWinBottomRow() then return @currentturn end
             end
             
-            case @lastmoveindex % 3
+            case lastmoveindex % 3
             #Determine column to check
             when 0
                 if CheckWinLeftColumn() then return @currentturn end
@@ -366,11 +452,11 @@ class TicTacToe
                 if CheckWinRightColumn() then return @currentturn end
             end
             
-            if @lastmoveindex % 2 == 0
+            if lastmoveindex % 2 == 0
                 #Determine diagonals to check
-                if @lastmoveindex == 4 or @lastmoveindex % 4 == 2
+                if lastmoveindex == 4 or lastmoveindex % 4 == 2
                     if CheckWinBottomLeftToTopRight() then return @currentturn end
-                elsif @lastmoveindex %4 == 0
+                elsif lastmoveindex %4 == 0
                     if CheckWinTopLeftToBottomRight() then return @currentturn end
                 end
             end
@@ -383,7 +469,6 @@ class TicTacToe
             #Game has not yet been decided
             return ''
         end
-
     end
     
     def CheckWinLeftColumn()
@@ -455,6 +540,7 @@ end
 #Run program
 t = TicTacToe.new
 t.SelectPlayers()
+if t.players == 1 then t.SelectDifficulty() end
 t.PrintInstructions()
 
 while t.playagain and not t.exit do
