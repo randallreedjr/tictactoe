@@ -28,6 +28,7 @@ class TicTacToe
         @playagain = true
         @difficulty = 'easy'
         @movesuccess = false
+        @score = Array.new(3,0)
     end
     
     def Reset
@@ -55,24 +56,73 @@ class TicTacToe
         puts "X goes first"
     end
     
+    def ShowHelp
+        #Show user what options are available
+        puts "Available commands are:"
+        puts "help - displays this screen"
+        puts "board - displays current game board"
+        puts "players - change number of players and reset score"
+        puts "score - display current score"
+        puts "clearscore - reset score"
+        puts "difficulty - change difficulty level"
+        puts "kb - changes to keyboard input (q,w,e,a,s,d,z,x,c)"
+        puts "num - changes to number inputs (default; 1-9)"
+        puts "np - inverts number input to match number pad"
+        puts "undo - undo last move (only one move can be undone)"
+        puts "exit - quits game"
+    end
+    
+    #Display board's current state
+    def PrintBoard(board)
+        #Display board in same format as instuctions, with values filled in
+        for i in 0..8
+            print "|" + board[i]
+            if i % 3 == 2
+                #Start new line every 3 columns
+                print "|\n"
+            end
+        end
+    end
+    
     def SelectPlayers
         if @movenum == 0 then
             puts "How many players? (Enter 1 or 2)"
             input = gets.chomp
             if input == '1'
-                @players = 1
+                if @players == 2 
+                    @players = 1
+                    ClearScore()
+                end
             elsif input == '2'
-                @players = 2
+                if @players == 1
+                    @players = 2
+                    ClearScore()
+                end
             elsif ValidateCommand(input)
                 puts "Select players before setting options"
                 SelectPlayers()
             else
                 puts "Invalid input; assuming 2 players"
-                @players = 2
+                if @players == 1
+                    @players = 2
+                    ClearScore()
+                end
             end
         else
             puts "Cannot change players during game"
         end
+    end
+    
+    def ShowScore
+        if @players == 1
+            puts "Player: " + @score[0].to_s + ", Computer: " + @score[1].to_s + ", Cat: " + @score[2].to_s
+        elsif @players == 2
+            puts "Player 1: " + @score[0].to_s + ", Player 2: " + @score[1].to_s + ", Cat: " + @score[2].to_s
+        end
+    end
+    
+    def ClearScore
+        @score = Array.new(3,0)
     end
     
     def SelectDifficulty
@@ -80,7 +130,7 @@ class TicTacToe
             puts "Select difficutly"
             puts "1) Easy"
             puts "2) Normal"
-            puts "3) Impossible"
+            puts "3) Hard"
             input = gets.chomp
             
             if input == '1' or input.downcase == 'easy'
@@ -89,9 +139,9 @@ class TicTacToe
             elsif input == '2' or input.downcase == 'normal'
                 @difficulty = 'normal'
                 puts "Now playing computer on normal"
-            elsif input == '3' or input.downcase == 'impossible'
+            elsif input == '3' or input.downcase == 'hard'
                 @difficulty = 'hard'
-                puts "Now playing computer on IMPOSSIBLE"
+                puts "Now playing computer on HARD"
             elsif ValidateCommand(input)
                 puts "Select difficulty before setting options"
                 SelectDifficulty()
@@ -122,7 +172,7 @@ class TicTacToe
         
         case command.downcase
     
-        when 'exit', 'board','kb','num','np','players','difficulty','help','undo','debug'
+        when 'exit', 'board','kb','num','np','players','difficulty','score','clearscore','help','undo','debug'
             return true
         else
             return false
@@ -212,6 +262,10 @@ class TicTacToe
                 PrintInstructions()
             when 'difficulty'
                 SelectDifficulty()
+            when 'score'
+                ShowScore()
+            when 'clearscore'
+                ClearScore()
             when 'help'
                 #display list of commands
                 ShowHelp()
@@ -227,19 +281,7 @@ class TicTacToe
             end
         end
     end
-    
-    #Display board's current state
-    def PrintBoard(board)
-        #Display board in same format as instuctions, with values filled in
-        for i in 0..8
-            print "|" + board[i]
-            if i % 3 == 2
-                #Start new line every 3 columns
-                print "|\n"
-            end
-        end
-    end
-    
+        
     #Print outcome of game to players
     def PrintWinner
         if @winner == 'C'
@@ -264,6 +306,9 @@ class TicTacToe
             PrintInstructions()
         elsif option == 'n' or option == 'exit'
             @playagain = false
+        elsif option == 'score'
+            ShowScore()
+            AskPlayAgain()
         else
             #for invalid input, recall recursively
             AskPlayAgain()
@@ -281,20 +326,6 @@ class TicTacToe
         puts "@exit: " + @exit.to_s
         puts "@keyboard: " + @keyboard.to_s
         puts "@numpad: " + @numpad.to_s
-    end
-    
-    def ShowHelp
-        #Show user what options are available
-        puts "Available commands are:"
-        puts "help - displays this screen"
-        puts "board - displays current game board"
-        puts "players - change number of players"
-        puts "difficulty - change difficulty level"
-        puts "kb - changes to keyboard input (q,w,e,a,s,d,z,x,c)"
-        puts "num - changes to number inputs (default; 1-9)"
-        puts "np - inverts number input to match number pad"
-        puts "undo - undo last move (only one move can be undone)"
-        puts "exit - quits game"
     end
     
     def MakeMove(move)
@@ -320,6 +351,15 @@ class TicTacToe
                     @currentturn = 'O'
                 else
                     @currentturn = 'X'
+                end
+            else
+                case @winner
+                when 'X'
+                    @score[0] += 1
+                when 'O'
+                    @score[1] += 1
+                when 'C'
+                    @score[2] += 1
                 end
             end
             @movesuccess = true
@@ -415,6 +455,34 @@ class TicTacToe
         end
     end
     
+    def UndoMove()
+        if @players == 1
+            #Undo computer and player move
+            #Clear 2 moves from board
+            @board[@lastmoveindex] = '_'
+            @board[@penultimatemoveindex] = '_'
+            @lastmoveindex = -1
+            @penultimatemoveindex = -1
+            
+            @movenum -= 2
+        else
+            #Undo player move only
+            #Clear move
+            @board[@lastmoveindex] = '_'
+            
+            #Decrement move counter
+            @movenum -= 1
+            
+            #Toggle current player
+            if @currentturn == 'X'
+                @currentturn = 'O'
+            else
+                @currentturn = 'X'
+            end
+        end
+        puts "Move undone"
+    end
+    
     def FindWinningMove()
         for i in 0..8
             if @board[i] == '_'
@@ -465,41 +533,12 @@ class TicTacToe
         puts "Computer chooses " + movestring
     end
     
-    def UndoMove()
-        if @players == 1
-            #Undo computer and player move
-            #Clear 2 moves from board
-            @board[@lastmoveindex] = '_'
-            @board[@penultimatemoveindex] = '_'
-            @lastmoveindex = -1
-            @penultimatemoveindex = -1
-            
-            @movenum -= 2
-        else
-            #Undo player move only
-            #Clear move
-            @board[@lastmoveindex] = '_'
-            
-            #Decrement move counter
-            @movenum -= 1
-            
-            #Toggle current player
-            if @currentturn == 'X'
-                @currentturn = 'O'
-            else
-                @currentturn = 'X'
-            end
-        end
-        puts "Move undone"
-    end
-    
     def CheckWinner(lastmoveindex)
         if @movenum < 3
             #Game cannot end in less than 5 moves
             #However, computer uses this to check for blocks on move 4
             return ''
         else
-            
             case lastmoveindex / 3
             #Determine row to check
             when 0
@@ -522,10 +561,13 @@ class TicTacToe
             
             if lastmoveindex % 2 == 0
                 #Determine diagonals to check
-                if lastmoveindex == 4 or lastmoveindex % 4 == 2
+                if lastmoveindex != 4 and lastmoveindex % 4 == 2
                     if CheckWinBottomLeftToTopRight() then return @currentturn end
-                elsif lastmoveindex %4 == 0
+                elsif lastmoveindex != 4 and lastmoveindex %4 == 0
                     if CheckWinTopLeftToBottomRight() then return @currentturn end
+                elsif lastmoveindex == 4
+                    if CheckWinTopLeftToBottomRight() then return @currentturn end    
+                    if CheckWinBottomLeftToTopRight() then return @currentturn end
                 end
             end
         end
