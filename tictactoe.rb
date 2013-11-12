@@ -80,7 +80,7 @@ class TicTacToe
             puts "Select difficutly"
             puts "1) Easy"
             puts "2) Normal"
-            puts "3) Hard"
+            puts "3) Impossible"
             input = gets.chomp
             
             if input == '1' or input.downcase == 'easy'
@@ -89,9 +89,9 @@ class TicTacToe
             elsif input == '2' or input.downcase == 'normal'
                 @difficulty = 'normal'
                 puts "Now playing computer on normal"
-            elsif input == '3' or input.downcase == 'hard'
+            elsif input == '3' or input.downcase == 'impossible'
                 @difficulty = 'hard'
-                puts "Now playing computer on HARD"
+                puts "Now playing computer on IMPOSSIBLE"
             elsif ValidateCommand(input)
                 puts "Select difficulty before setting options"
                 SelectDifficulty()
@@ -335,13 +335,41 @@ class TicTacToe
             if @difficulty == 'easy'
                 move = RandomMove()
             elsif @difficulty == 'hard'
+                move = -1
                 if @movenum == 1
                     if @board[4] == '_'
                         move = 4
                     else
                         move = 0
                     end
-                else
+                elsif @movenum == 3
+                    if @board[4] == 'X'
+                        if @board[0] != '_' and @board[8] != '_'
+                            move = 2
+                            elsif @board[2] != '_' and @board[6] != '_'
+                            move = 0
+                        end
+                    else
+                        if (@board[1] == 'X' and @board[5] == 'X') or (@board[3] == 'X' and @board[7] == 'X')
+                            move = 0
+                        elsif (@board[3] == 'X' and @board[8] == 'X') or (@board[5] == 'X' and @board[6] == 'X') or (@board[3] == 'X' and @board[5] == 'X') or (@board[0] == 'X' and @board[8] == 'X') or (@board[2] == 'X' and @board[6] == 'X')
+                            move = 1
+                        elsif (@board[1] == 'X' and @board[3] == 'X') or (@board[5] == 'X' and @board[7] == 'X')
+                            move = 2
+                        elsif (@board[2] == 'X' and @board[7] == 'X') or (@board[1] == 'X' and @board[8] == 'X') or (@board[1] == 'X' and @board[7] == 'X')
+                            move = 3
+                        elsif (@board[1] == 'X' and @board[6] == 'X') or (@board[0] == 'X' and @board[7] == 'X')
+                            move = 5
+                        elsif (@board[0] == 'X' and @board[5] == 'X') or (@board[2] == 'X' and @board[3] == 'X')
+                            move = 7
+                        end
+                    end
+                elsif @movenum == 5
+                    if (@board[4] == 'O' and @board[5] == 'X' and @board[7] == 'X' and @board[1] != '_' and @board[3] != '_')
+                        move = 0
+                    end
+                end
+                if move == -1
                     #Check for winning move first
                     #puts "Checking for win..."
                     move = FindWinningMove()
