@@ -98,6 +98,8 @@ class TicTacToe
                     @players = 2
                     ClearScore()
                 end
+            elsif input.downcase == 'exit'
+                @exit = true
             elsif ValidateCommand(input)
                 puts "Select players before setting options"
                 SelectPlayers()
@@ -142,6 +144,8 @@ class TicTacToe
             elsif input == '3' or input.downcase == 'hard'
                 @difficulty = 'hard'
                 puts "Now playing computer on HARD"
+            elsif input.downcase == 'exit'
+                @exit = true
             elsif ValidateCommand(input)
                 puts "Select difficulty before setting options"
                 SelectDifficulty()
@@ -652,7 +656,7 @@ end
 t = TicTacToe.new
 t.SelectPlayers()
 if t.players == 1 then t.SelectDifficulty() end
-t.PrintInstructions()
+if not t.exit then t.PrintInstructions() end
 
 while t.playagain and not t.exit do
     until t.winner != '' or t.movenum == 9 or t.exit
