@@ -12,8 +12,11 @@ class TicTacToe
         #Set starting values for class variables
         #@board = ['_','_','_','_','_','_','_','_','_']
         @board = Array.new(9,'_')
+        #layout if choosing keyboard option
         @keyboardboard = ['Q','W','E','A','S','D','Z','X','C']
+        #layout if using number pad option
         @numpadboard = ['7','8','9','4','5','6','1','2','3']
+        #layout if using default number option
         @defaultboard = ['1','2','3','4','5','6','7','8','9']
         @players = 2
         #Keep track of current player
@@ -99,6 +102,7 @@ class TicTacToe
                     ClearScore()
                 end
             elsif input.downcase == 'exit'
+                #exit anytime
                 @exit = true
             elsif ValidateCommand(input)
                 puts "Select players before setting options"
@@ -128,6 +132,7 @@ class TicTacToe
     end
     
     def SelectDifficulty
+        #Cannot change difficulty during game
         if @movenum == 0 then
             puts "Select difficutly"
             puts "1) Easy"
@@ -187,7 +192,7 @@ class TicTacToe
         if command.length == 1 
             if not @keyboard and (command >= '1' and command <= '9')
                 if @numpad
-                    #Convert keypad entry to normal number entry
+                    #Convert keypad entry to normal number entry; middle row stays the same
                     case command
                     when '1'
                         command = '7'
@@ -237,12 +242,15 @@ class TicTacToe
             end
         else
             case command.downcase
-            #Valid commands are move space, exit, board, kb, num, np, players, help, and debug
+            #Valid commands are move space, exit, board, kb, num, np, players, 
+            # difficulty, score, clearscore, help, undo, and debug
             when 'exit' 
                 @exit = true
                 @playagain = false
             when 'board'
                 PrintBoard(@board)
+                
+            #When changing input, always repritn instructions to show player what input is valid
             when 'kb'
                 @keyboard = true
                 @numpad = false
@@ -258,6 +266,7 @@ class TicTacToe
                 @numpad = true
                 puts "Now using number pad input"
                 PrintInstructions()
+                
             when 'players'
                 SelectPlayers()
                 if @players == 1
@@ -297,7 +306,7 @@ class TicTacToe
             elsif @players == 1 and @winner == 'X'
                 puts "Congratulations! Player wins!"
             else
-                #1 player, 'O' won
+                #1 player, 'O' won. Do not congratulate player on computer victory.
                 puts "Sorry, computer wins."
             end
         end
@@ -312,6 +321,7 @@ class TicTacToe
         elsif option == 'n' or option == 'exit'
             @playagain = false
         elsif option == 'score'
+            #Player may base decision to play again on current score
             ShowScore()
             AskPlayAgain()
         else
@@ -328,12 +338,14 @@ class TicTacToe
         puts "@currentturn: " + @currentturn
         puts "@winner: " + @winner
         puts "@movenum: " + @movenum.to_s
+        puts "@lastmoveindex: " + @lastmoveindex.to_s
         puts "@exit: " + @exit.to_s
         puts "@keyboard: " + @keyboard.to_s
         puts "@numpad: " + @numpad.to_s
     end
     
     def MakeMove(move)
+        #Cast string input to integer; easier to work with array index
         move = Integer(move)
         @penultimatemoveindex = @lastmoveindex
         @lastmoveindex = move-1
@@ -378,8 +390,28 @@ class TicTacToe
     def ComputerMove()
         if @winner == ''
             if @difficulty == 'easy'
+                #Easy computer moves randomly
                 move = RandomMove()
+            elsif @difficulty == 'normal'
+                #Normal computer moves randomly early on, but looks for wins or blocks as the game progresses
+                if @movenum < 3
+                    move = RandomMove()
+                else
+                    #Check for winning move first
+                    #puts "Checking for win..."
+                    move = FindWinningMove()
+                    if move == -1
+                         #No winning move available, try block next
+                        #puts "Checking for block..."
+                        move = FindBlockingMove()
+                        if move == -1 then
+                            #puts "Moving randomly..."
+                            move = RandomMove()
+                        end
+                    end
+                end
             elsif @difficulty == 'hard'
+                #Hard computer knows what move to make in every situation, until cat game is guaranteed
                 move = -1
                 if @movenum == 1
                     if @board[4] == '_'
@@ -437,23 +469,7 @@ class TicTacToe
                     end
                 end
                 
-            elsif @difficulty == 'normal'
-                if @movenum < 3
-                    move = RandomMove()
-                else
-                    #Check for winning move first
-                    #puts "Checking for win..."
-                    move = FindWinningMove()
-                    if move == -1
-                         #No winning move available, try block next
-                        #puts "Checking for block..."
-                        move = FindBlockingMove()
-                        if move == -1 then
-                            #puts "Moving randomly..."
-                            move = RandomMove()
-                        end
-                    end
-                end
+
             end
             ShowComputerMove(move)
             MakeMove(move+1) 
@@ -489,6 +505,7 @@ class TicTacToe
     end
     
     def FindWinningMove()
+        #Pretend O went in any available square and check for win
         for i in 0..8
             if @board[i] == '_'
                 @board[i] = 'O'
@@ -503,6 +520,7 @@ class TicTacToe
     end
     
     def FindBlockingMove()
+        #Pretend X went in any available square and check for win; that space necessitates a block
         for i in 0..8
             if @board[i] == '_'
                 @board[i] = 'X'
@@ -527,7 +545,7 @@ class TicTacToe
     end
     
     def ShowComputerMove(move)
-                #Need to increment index to match normal layout
+        #Need to increment index to match normal layout
         if @keyboard
             movestring = @keyboardboard[move]
         elsif @numpad
@@ -683,4 +701,5 @@ while t.playagain and not t.exit do
     end
 end
 
+#Always thank your supporters
 puts "Thanks for playing!"
