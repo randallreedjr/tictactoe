@@ -266,6 +266,7 @@ class TicTacToe
                 ShowScore()
             when 'clearscore'
                 ClearScore()
+                ShowScore()
             when 'help'
                 #display list of commands
                 ShowHelp()
