@@ -1,12 +1,30 @@
 class TicTacToe
     
+    class Player
+        attr_accessor :score
+        attr_reader :type
+        attr_reader :name
+        attr_accessor :mark
+        def initialize(type, name, mark)
+            @name = name
+            @type = type
+            @score = 0
+            @mark = mark
+        end
+        
+        def Print()
+            print name + ", type: " + type + ", score: " + score.to_s
+        end
+    end
+    
     #Read access to some class variables
     attr_reader :winner
     attr_reader :movenum
     attr_reader :playagain
     attr_reader :exit
     attr_reader :keyboard
-    attr_reader :players
+    attr_reader :player1
+    attr_reader :player2
     
     def initialize
         #Set starting values for class variables
@@ -18,7 +36,6 @@ class TicTacToe
         @numpadboard = ['7','8','9','4','5','6','1','2','3']
         #layout if using default number option
         @defaultboard = ['1','2','3','4','5','6','7','8','9']
-        @players = 2
         #Keep track of current player
         @currentturn = 'X'
         @winner = ''
@@ -31,7 +48,7 @@ class TicTacToe
         @playagain = true
         @difficulty = 'easy'
         @movesuccess = false
-        @score = Array.new(3,0)
+        @catgames = 0
     end
     
     def Reset
@@ -92,15 +109,11 @@ class TicTacToe
             puts "How many players? (Enter 1 or 2)"
             input = gets.chomp
             if input == '1'
-                if @players == 2 
-                    @players = 1
-                    ClearScore()
-                end
+                @player1 = Player.new('human', 'Player','X')
+                @player2 = Player.new('computer', 'Computer','O')
             elsif input == '2'
-                if @players == 1
-                    @players = 2
-                    ClearScore()
-                end
+                @player1 = Player.new('human', 'Player 1','X')
+                @player2 = Player.new('human', 'Player 2','O')
             elsif input.downcase == 'exit'
                 #exit anytime
                 @exit = true
@@ -109,26 +122,22 @@ class TicTacToe
                 SelectPlayers()
             else
                 puts "Invalid input; assuming 2 players"
-                if @players == 1
-                    @players = 2
-                    ClearScore()
-                end
+                @player1 = Player.new('human', 'Player 1','X')
+                @player2 = Player.new('human', 'Player 2','O')
             end
         else
             puts "Cannot change players during game"
         end
     end
     
-    def ShowScore
-        if @players == 1
-            puts "Player: " + @score[0].to_s + ", Computer: " + @score[1].to_s + ", Cat: " + @score[2].to_s
-        elsif @players == 2
-            puts "Player 1: " + @score[0].to_s + ", Player 2: " + @score[1].to_s + ", Cat: " + @score[2].to_s
-        end
+    def ShowScore    
+        puts @player1.name + ": " + @player1.score.to_s + ", " + @player2.name + ": " + @player2.score.to_s + ", Cat: " + @catgames.to_s
     end
     
     def ClearScore
-        @score = Array.new(3,0)
+        @player1.score = 0
+        @player2.score = 0
+        @catgames = 0
     end
     
     def SelectDifficulty
@@ -209,7 +218,7 @@ class TicTacToe
                     end
                 end
                 MakeMove(command)
-                if @players == 1 and @movesuccess
+                if @player2.type == 'computer' and @movesuccess
                     #Computer will check for winner before making move
                     ComputerMove()
                 end
@@ -235,7 +244,7 @@ class TicTacToe
                     command = 9
                 end
                 MakeMove(command)
-                if @players == 1 and @movesuccess
+                if @player2.type == 'computer' and @movesuccess
                     #Computer will check for winner before making move
                     ComputerMove()
                 end
@@ -250,7 +259,7 @@ class TicTacToe
             when 'board'
                 PrintBoard(@board)
                 
-            #When changing input, always repritn instructions to show player what input is valid
+            #When changing input, always reprint instructions to show player what input is valid
             when 'kb'
                 @keyboard = true
                 @numpad = false
@@ -269,7 +278,7 @@ class TicTacToe
                 
             when 'players'
                 SelectPlayers()
-                if @players == 1
+                if @player2.type == 'computer'
                     SelectDifficulty()
                 end
                 PrintInstructions()
@@ -301,13 +310,13 @@ class TicTacToe
         if @winner == 'C'
             puts "Sorry, cat's game."
         else
-            if @players == 2 
-                puts "Congratulations! " + @winner + " wins!"
-            elsif @players == 1 and @winner == 'X'
-                puts "Congratulations! Player wins!"
-            else
+            if @player1.mark == @winner
+                puts "Congratulations! " + @player1.name + " wins!"
+            elsif @player2.mark == @winner and @player2.type = 'human'
+                puts "Congratulations! " + @player2.name + " wins!"
+            elsif @player2.mark == @winner and @player2.type = 'computer'
                 #1 player, 'O' won. Do not congratulate player on computer victory.
-                puts "Sorry, computer wins."
+                puts "Sorry, ' + player2.name + ' wins."
             end
         end
     end
@@ -333,7 +342,8 @@ class TicTacToe
     def ShowDebug
         #Print internal values so developer can inspect
         puts "Debug mode - Dump internal values"
-        puts "@players: " + @players.to_s
+        puts @player1.Print()
+        puts @player2.Print()
         puts "@difficulty: " + @difficulty
         puts "@currentturn: " + @currentturn
         puts "@winner: " + @winner
@@ -372,11 +382,19 @@ class TicTacToe
             else
                 case @winner
                 when 'X'
-                    @score[0] += 1
+                    if @player1.mark == 'X'
+                        @player1.score += 1
+                    else
+                        @player2.score += 1
+                    end
                 when 'O'
-                    @score[1] += 1
+                    if @player1.mark == 'X'
+                        @player1.score += 1
+                    else
+                        @player2.score += 1
+                    end
                 when 'C'
-                    @score[2] += 1
+                    @catgames += 1
                 end
             end
             @movesuccess = true
@@ -477,14 +495,13 @@ class TicTacToe
     end
     
     def UndoMove()
-        if @players == 1
+        if @player2.type=='computer'
             #Undo computer and player move
             #Clear 2 moves from board
             @board[@lastmoveindex] = '_'
             @board[@penultimatemoveindex] = '_'
             @lastmoveindex = -1
             @penultimatemoveindex = -1
-            
             @movenum -= 2
         else
             #Undo player move only
@@ -673,7 +690,7 @@ end
 #Run program
 t = TicTacToe.new
 t.SelectPlayers()
-if t.players == 1 then t.SelectDifficulty() end
+if t.player2.type == 'computer' then t.SelectDifficulty() end
 if not t.exit then t.PrintInstructions() end
 
 while t.playagain and not t.exit do
