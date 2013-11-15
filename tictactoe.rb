@@ -73,7 +73,12 @@ class TicTacToe
             puts "Select space using number keys"
             PrintBoard(@defaultboard)
         end
-        puts "X goes first"
+        
+        if player1.mark == 'X' 
+            puts player1.name + ' (X) goes first'
+        else
+            puts player2.name + ' (X) goes first'
+        end
     end
     
     def ShowHelp
@@ -130,8 +135,31 @@ class TicTacToe
         end
     end
     
+    def SwapPlayers
+        ShowScore()
+        if @player1.type == @player2.type
+            temp = @player1.mark
+            @player1.mark = @player2.mark
+            @player2.mark = temp
+        end
+        ShowScore()
+    end
+    
     def ShowScore    
         puts @player1.name + ": " + @player1.score.to_s + ", " + @player2.name + ": " + @player2.score.to_s + ", Cat: " + @catgames.to_s
+    end
+    
+    def UpdateScore(winner)
+        #Add a point to the winning player's score
+        
+        if @player1.mark == winner
+            @player1.score += 1
+        elsif @player2.mark == winner
+            @player2.score += 1
+        else
+            @catgames += 1
+        end
+
     end
     
     def ClearScore
@@ -312,9 +340,9 @@ class TicTacToe
         else
             if @player1.mark == @winner
                 puts "Congratulations! " + @player1.name + " wins!"
-            elsif @player2.mark == @winner and @player2.type = 'human'
+            elsif @player2.mark == @winner and @player2.type == 'human'
                 puts "Congratulations! " + @player2.name + " wins!"
-            elsif @player2.mark == @winner and @player2.type = 'computer'
+            elsif @player2.mark == @winner and @player2.type == 'computer'
                 #1 player, 'O' won. Do not congratulate player on computer victory.
                 puts "Sorry, ' + player2.name + ' wins."
             end
@@ -326,6 +354,7 @@ class TicTacToe
         option = gets.chomp.downcase
         if option == 'y'
             Reset()
+            SwapPlayers()
             PrintInstructions()
         elsif option == 'n' or option == 'exit'
             @playagain = false
@@ -380,22 +409,7 @@ class TicTacToe
                     @currentturn = 'X'
                 end
             else
-                case @winner
-                when 'X'
-                    if @player1.mark == 'X'
-                        @player1.score += 1
-                    else
-                        @player2.score += 1
-                    end
-                when 'O'
-                    if @player1.mark == 'X'
-                        @player1.score += 1
-                    else
-                        @player2.score += 1
-                    end
-                when 'C'
-                    @catgames += 1
-                end
+                UpdateScore(@winner)
             end
             @movesuccess = true
         else
