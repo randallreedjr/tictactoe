@@ -361,9 +361,19 @@ class TicTacToe
                 end
                 PrintBoard(@board)
             when 'alternateon'
-                @alternate = true
+                if not @alternate
+                    puts "Players will now alternate in 2 player games"
+                    @alternate = true
+                else
+                    puts "Players are already alternating in 2 player games"
+                end
             when 'alternateoff'
-                @alternate = false
+                if @alternate
+                    puts "Players will no longer alternate in 2 player games"
+                    @alternate = false
+                else
+                    puts "Players already are not alternating in 2 player games"
+                end
             when 'debug'
                 #for developer only; not included in help list
                 ShowDebug()
