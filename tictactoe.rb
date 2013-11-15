@@ -1,15 +1,31 @@
 class TicTacToe
     
     class Player
-        attr_accessor :score
+        attr_reader :score
         attr_reader :type
         attr_reader :name
-        attr_accessor :mark
+        attr_reader :mark
         def initialize(type, name, mark)
             @name = name
             @type = type
             @score = 0
             @mark = mark
+        end
+        
+        def AddScore()
+            @score += 1
+        end
+        
+        def ClearScore()
+            @score = 0
+        end
+        
+        def SwapMark()
+            if @mark == 'X' 
+                @mark = 'O'
+            else
+                @mark = 'X'
+            end
         end
         
         def Print()
@@ -25,6 +41,7 @@ class TicTacToe
     attr_reader :keyboard
     attr_reader :player1
     attr_reader :player2
+    attr_reader :cat
     
     def initialize
         #Set starting values for class variables
@@ -48,7 +65,7 @@ class TicTacToe
         @playagain = true
         @difficulty = 'easy'
         @movesuccess = false
-        @catgames = 0
+        @alternate = true
     end
     
     def Reset
@@ -83,8 +100,9 @@ class TicTacToe
     
     def ShowHelp
         #Show user what options are available
+        print "\n"
         puts "Available commands are:"
-        puts "help - displays this screen"
+        puts "help (or ?) - displays this screen"
         puts "board - displays current game board"
         puts "players - change number of players and reset score"
         puts "score - display current score"
@@ -94,7 +112,25 @@ class TicTacToe
         puts "num - changes to number inputs (default; 1-9)"
         puts "np - inverts number input to match number pad"
         puts "undo - undo last move (only one move can be undone)"
+        puts "alternateon - switch first player after each two player game"
+        puts "alternateoff - do not switch players after each two player game"
         puts "exit - quits game"
+        print "\n"
+    end
+    
+    def ShowDebug
+        #Print internal values so developer can inspect
+        puts "Debug mode - Dump internal values"
+        puts @player1.Print()
+        puts @player2.Print()
+        puts "@difficulty: " + @difficulty
+        puts "@currentturn: " + @currentturn
+        puts "@winner: " + @winner
+        puts "@movenum: " + @movenum.to_s
+        puts "@lastmoveindex: " + @lastmoveindex.to_s
+        puts "@exit: " + @exit.to_s
+        puts "@keyboard: " + @keyboard.to_s
+        puts "@numpad: " + @numpad.to_s
     end
     
     #Display board's current state
@@ -116,9 +152,11 @@ class TicTacToe
             if input == '1'
                 @player1 = Player.new('human', 'Player','X')
                 @player2 = Player.new('computer', 'Computer','O')
+                @cat = Player.new('cat', 'Cat', 'C')
             elsif input == '2'
                 @player1 = Player.new('human', 'Player 1','X')
                 @player2 = Player.new('human', 'Player 2','O')
+                @cat = Player.new('cat', 'Cat', 'C')
             elsif input.downcase == 'exit'
                 #exit anytime
                 @exit = true
@@ -129,6 +167,7 @@ class TicTacToe
                 puts "Invalid input; assuming 2 players"
                 @player1 = Player.new('human', 'Player 1','X')
                 @player2 = Player.new('human', 'Player 2','O')
+                @cat = Player.new('cat', 'Cat', 'C')
             end
         else
             puts "Cannot change players during game"
@@ -136,36 +175,31 @@ class TicTacToe
     end
     
     def SwapPlayers
-        ShowScore()
-        if @player1.type == @player2.type
-            temp = @player1.mark
-            @player1.mark = @player2.mark
-            @player2.mark = temp
-        end
-        ShowScore()
+        @player1.SwapMark()
+        @player2.SwapMark()
     end
     
     def ShowScore    
-        puts @player1.name + ": " + @player1.score.to_s + ", " + @player2.name + ": " + @player2.score.to_s + ", Cat: " + @catgames.to_s
+        puts @player1.name + ": " + @player1.score.to_s + ", " + @player2.name + ": " + @player2.score.to_s + ", " + @cat.name + ": " + @cat.score.to_s
     end
     
     def UpdateScore(winner)
         #Add a point to the winning player's score
         
         if @player1.mark == winner
-            @player1.score += 1
+            @player1.AddScore()
         elsif @player2.mark == winner
-            @player2.score += 1
+            @player2.AddScore()
         else
-            @catgames += 1
+            @cat.AddScore()
         end
 
     end
     
     def ClearScore
-        @player1.score = 0
-        @player2.score = 0
-        @catgames = 0
+        @player1.ClearScore
+        @player2.ClearScore
+        @cat.ClearScore
     end
     
     def SelectDifficulty
@@ -201,7 +235,7 @@ class TicTacToe
     end
     
     def ValidateCommand(command)
-        if command.length == 1 
+        if command.length == 1  and command != '?'
             if not @keyboard and (command >= '1' and command <= '9')
                 return true
             elsif @keyboard
@@ -218,7 +252,7 @@ class TicTacToe
         
         case command.downcase
     
-        when 'exit', 'board','kb','num','np','players','difficulty','score','clearscore','help','undo','debug'
+        when 'exit','board','kb','num','np','players','difficulty','score','clearscore','help','?','undo','debug', 'alternateon', 'alternateoff'
             return true
         else
             return false
@@ -226,7 +260,7 @@ class TicTacToe
     end
     
     def ExecuteCommand(command)
-        if command.length == 1 
+        if command.length == 1 and command != '?'
             if not @keyboard and (command >= '1' and command <= '9')
                 if @numpad
                     #Convert keypad entry to normal number entry; middle row stays the same
@@ -317,7 +351,7 @@ class TicTacToe
             when 'clearscore'
                 ClearScore()
                 ShowScore()
-            when 'help'
+            when 'help', '?'
                 #display list of commands
                 ShowHelp()
             when 'undo'
@@ -326,6 +360,10 @@ class TicTacToe
                     UndoMove()
                 end
                 PrintBoard(@board)
+            when 'alternateon'
+                @alternate = true
+            when 'alternateoff'
+                @alternate = false
             when 'debug'
                 #for developer only; not included in help list
                 ShowDebug()
@@ -344,7 +382,7 @@ class TicTacToe
                 puts "Congratulations! " + @player2.name + " wins!"
             elsif @player2.mark == @winner and @player2.type == 'computer'
                 #1 player, 'O' won. Do not congratulate player on computer victory.
-                puts "Sorry, ' + player2.name + ' wins."
+                puts "Sorry, " + player2.name + " wins."
             end
         end
     end
@@ -354,7 +392,9 @@ class TicTacToe
         option = gets.chomp.downcase
         if option == 'y'
             Reset()
-            SwapPlayers()
+            if @alternate
+                SwapPlayers()
+            end
             PrintInstructions()
         elsif option == 'n' or option == 'exit'
             @playagain = false
@@ -363,29 +403,17 @@ class TicTacToe
             ShowScore()
             AskPlayAgain()
         else
+            puts "Invalid input"
             #for invalid input, recall recursively
             AskPlayAgain()
         end
-    end
-    
-    def ShowDebug
-        #Print internal values so developer can inspect
-        puts "Debug mode - Dump internal values"
-        puts @player1.Print()
-        puts @player2.Print()
-        puts "@difficulty: " + @difficulty
-        puts "@currentturn: " + @currentturn
-        puts "@winner: " + @winner
-        puts "@movenum: " + @movenum.to_s
-        puts "@lastmoveindex: " + @lastmoveindex.to_s
-        puts "@exit: " + @exit.to_s
-        puts "@keyboard: " + @keyboard.to_s
-        puts "@numpad: " + @numpad.to_s
-    end
+    end    
+
     
     def MakeMove(move)
         #Cast string input to integer; easier to work with array index
         move = Integer(move)
+        #store up to 2 moves for undo
         @penultimatemoveindex = @lastmoveindex
         @lastmoveindex = move-1
         #Array index is one less than move space
@@ -509,30 +537,34 @@ class TicTacToe
     end
     
     def UndoMove()
-        if @player2.type=='computer'
-            #Undo computer and player move
-            #Clear 2 moves from board
-            @board[@lastmoveindex] = '_'
-            @board[@penultimatemoveindex] = '_'
-            @lastmoveindex = -1
-            @penultimatemoveindex = -1
-            @movenum -= 2
+        if @lastmoveindex == -1
+            puts "Move cannot be undone"
         else
-            #Undo player move only
-            #Clear move
-            @board[@lastmoveindex] = '_'
-            
-            #Decrement move counter
-            @movenum -= 1
-            
-            #Toggle current player
-            if @currentturn == 'X'
-                @currentturn = 'O'
+            if @player2.type=='computer'
+                #Undo computer and player move
+                #Clear 2 moves from board
+                @board[@lastmoveindex] = '_'
+                @board[@penultimatemoveindex] = '_'
+                @lastmoveindex = -1
+                @penultimatemoveindex = -1
+                @movenum -= 2
             else
-                @currentturn = 'X'
+                #Undo player move only
+                #Clear move
+                @board[@lastmoveindex] = '_'
+                @lastmoveindex = -1
+                #Decrement move counter
+                @movenum -= 1
+                
+                #Toggle current player
+                if @currentturn == 'X'
+                    @currentturn = 'O'
+                else
+                    @currentturn = 'X'
+                end
             end
+            puts "Move undone"
         end
-        puts "Move undone"
     end
     
     def FindWinningMove()
